@@ -4112,10 +4112,17 @@ void PianoRoll::adjustLeftRightScoll(int value)
 void PianoRoll::wheelEvent(QWheelEvent * we )
 {
 	we->accept();
-	// handle wheel events for note edit area - for editing note vol/pan with mousewheel
 	const auto pos = we->position().toPoint();
-	if (pos.x() > noteEditLeft() && pos.x() < noteEditRight()
-		&& pos.y() > noteEditTop() && pos.y() < noteEditBottom())
+
+	bool inPropertyArea = (pos.x() > noteEditLeft() && pos.x() < noteEditRight()
+		&& pos.y() > noteEditTop() && pos.y() < noteEditBottom());
+
+	// Check if we are over the main piano roll canvas grid instead
+	bool inCanvasArea = (pos.x() > m_whiteKeyWidth && pos.x() < width() - SCROLLBAR_SIZE
+		&& pos.y() > PR_TOP_MARGIN && pos.y() < keyAreaBottom());
+
+	// Act if we are in the properties block OR hovering over a note on the main grid
+	if (inPropertyArea || (inCanvasArea && noteUnderMouse() != nullptr))
 	{
 		if (!hasValidMidiClip()) {return;}
 		// get values for going through notes
@@ -4145,7 +4152,15 @@ void PianoRoll::wheelEvent(QWheelEvent * we )
 
 				nv.push_back(i);
 			}
-
+		// If no notes were caught via standard column proximity, but we are hovering over a single note, target it explicitly
+		if (nv.empty() && inCanvasArea)
+		{
+			Note* hoveredNote = noteUnderMouse();
+			if (hoveredNote != nullptr)
+			{
+				nv.push_back(hoveredNote);
+			}
+		}
 			// not on selection - just push back the note if it is within range
 			if (!isSelection && i->withinRange(ticks_start, ticks_end))
 			{

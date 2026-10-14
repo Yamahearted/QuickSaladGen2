@@ -97,7 +97,7 @@ QColor mapThemeColor(const QColor& c, int accentHue)
 		int newV = v;
 		if (v < 130)
 		{
-			newV = static_cast<int>(v * 0.4);  // darken backgrounds/panels
+			newV = static_cast<int>(v * 0.85);  // darken backgrounds/panels
 		}
 		if (newS != s || newV != v)
 		{

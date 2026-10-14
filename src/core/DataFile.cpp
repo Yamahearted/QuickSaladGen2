@@ -48,7 +48,7 @@
 #include "Note.h"
 #include "PluginFactory.h"
 #include "ProjectVersion.h"
-#include "KitsuneToneBranding.h"
+#include "Branding.h"
 #include "SongEditor.h"
 #include "TextFloat.h"
 #include "Track.h"
@@ -2186,8 +2186,8 @@ void DataFile::loadData( const QByteArray & _data, const QString & _sourceFile )
 			QMessageBox::critical(nullptr,
 				SongEditor::tr("Incompatible project"),
 				SongEditor::tr(
-					"This file is not a KitsuneTone project. 狐Tone projects use "
-					"the dedicated .ktp/.ktpz format and cannot open LMMS project files."));
+					"This file is not a QuickSalad project. QuickSalad projects use "
+					"the dedicated .qsl/.qslz format and cannot open LMMS project files."));
 		}
 		clear();
 		m_type = Type::Unknown;

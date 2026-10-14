@@ -1,0 +1,5 @@
+kitsune
+kitune
+狐
+sakiika
+\.kt(pz|p|t)

@@ -142,7 +142,7 @@ inline void loadTranslation( const QString & tname,
 
 void printVersion( char *executableName )
 {
-	printf("KitsuneTone (狐Tone) %s\n(%s %s, Qt %s, %s)\n\n"
+	printf("QuickSalad %s\n(%s %s, Qt %s, %s)\n\n"
 		"Build options:\n%s\n\n"
 		"Copyright (c) %s\n\n"
 		"This program is free software; you can redistribute it and/or\n"
@@ -159,11 +159,11 @@ void printVersion( char *executableName )
 
 void printHelp()
 {
-	printf( "KitsuneTone (狐Tone) %s\n"
+	printf( "QuickSalad %s\n"
 		"Copyright (c) %s\n\n"
-		"Usage: KitsuneTone [global options...] [<action> [action parameters...]]\n\n"
+		"Usage: QuickSalad [global options...] [<action> [action parameters...]]\n\n"
 		"Actions:\n"
-		"  <no action> [options...] [<project>]  Start KitsuneTone in normal GUI mode\n"
+		"  <no action> [options...] [<project>]  Start QuickSalad in normal GUI mode\n"
 		"  dump <in>                             Dump XML of compressed file <in>\n"
 		"  compress <in>                         Compress file <in>\n"
 		"  render <project> [options...]         Render given project file\n"
@@ -358,7 +358,7 @@ int main( int argc, char * * argv )
 #if !defined(LMMS_BUILD_WIN32) && !defined(LMMS_BUILD_HAIKU)
 	if ( ( getuid() == 0 || geteuid() == 0 ) && !allowRoot )
 	{
-		printf( "KitsuneTone cannot be run as root.\nUse \"--allowroot\" to override.\n\n" );
+		printf( "QuickSalad cannot be run as root.\nUse \"--allowroot\" to override.\n\n" );
 		return EXIT_FAILURE;
 	}
 #endif
@@ -392,13 +392,13 @@ int main( int argc, char * * argv )
 	{
 		app = std::make_unique<gui::MainApplication>(argc, argv);
 	}
-	QCoreApplication::setApplicationName(QStringLiteral("KitsuneTone"));
+	QCoreApplication::setApplicationName(QStringLiteral("QuickSalad"));
 	if (!coreOnly)
 	{
-		QApplication::setApplicationDisplayName(QStringLiteral("狐Tone"));
+		QApplication::setApplicationDisplayName(QStringLiteral("QuickSalad"));
 	}
-	QCoreApplication::setOrganizationName(QStringLiteral("KitsuneTone"));
-	QCoreApplication::setOrganizationDomain(QStringLiteral("github.com/SakiikaVR"));
+	QCoreApplication::setOrganizationName(QStringLiteral("QuickSalad"));
+	QCoreApplication::setOrganizationDomain(QStringLiteral("github.com/Yamahearted"));
 
 	OutputSettings os(44100, 160, OutputSettings::BitDepth::Depth16Bit, OutputSettings::StereoMode::JointStereo);
 	ProjectRenderer::ExportFileFormat eff = ProjectRenderer::ExportFileFormat::Wave;
@@ -812,12 +812,12 @@ int main( int argc, char * * argv )
 		}
 		catch (const std::exception& exception)
 		{
-			qCritical("KitsuneTone GUI initialization failed: %s", exception.what());
+			qCritical("QuickSalad GUI initialization failed: %s", exception.what());
 			return EXIT_FAILURE;
 		}
 		catch (...)
 		{
-			qCritical("KitsuneTone GUI initialization failed with an unknown exception");
+			qCritical("QuickSalad GUI initialization failed with an unknown exception");
 			return EXIT_FAILURE;
 		}
 
@@ -852,12 +852,12 @@ int main( int argc, char * * argv )
 				"</html>" ).arg(
 				MainWindow::tr( "There is a recovery file present. "
 					"It looks like the last session did not end "
-					"properly or another instance of KitsuneTone is "
+					"properly or another instance of QuickSalad is "
 					"already running. Do you want to recover the "
 					"project of this session?" ),
 				MainWindow::tr( "Recover" ),
 				MainWindow::tr( "Recover the file. Please don't run "
-					"multiple instances of KitsuneTone when you do this." ),
+					"multiple instances of QuickSalad when you do this." ),
 				MainWindow::tr( "Discard" ),
 				MainWindow::tr( "Launch a default session and delete "
 					"the restored files. This is not reversible." )

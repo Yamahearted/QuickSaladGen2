@@ -17,3 +17,5 @@ compile_commands.json
 /install/
 /vcpkg_installed/
 aqtinstall.log
+1.rebuild.cmd
+2.build.cmd

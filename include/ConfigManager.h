@@ -213,7 +213,7 @@ public:
 
 	const QString recoveryFile() const
 	{
-		return m_workingDir + "recover.ktp";
+		return m_workingDir + "recover.qsl";
 	}
 
 	inline const QStringList & recentlyOpenedProjects() const
@@ -244,7 +244,7 @@ public:
 	static QStringList availableVstEmbedMethods();
 	QString vstEmbedMethod() const;
 
-	// Returns true if the KitsuneTone working directory exists on disk.
+	// Returns true if the QuickSalad working directory exists on disk.
 	bool hasWorkingDir() const;
 
 	void addRecentlyOpenedProject(const QString & _file);

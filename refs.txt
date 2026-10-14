@@ -1,0 +1,95 @@
+CMakeLists.txt:56:SET(PROJECT_COPYRIGHT   "2004-2026 LMMS contributors; 2026 KitsuneTone contributors, 2026-${PROJECT_YEAR} QuickSalad Team")
+README.md:1:# 狐Tone (KitsuneTone)
+README.md:4:  <img src=".github/assets/kitsunetone-logo.png" alt="狐Toneロゴ" width="480">
+README.md:7:狐Toneは、[LMMS](https://github.com/LMMS/lmms)を基盤として独自機能を追加した、Windows向けのオリジナルDAWです。正式版2.3.0ではVST3専用ホスト、共通プラグイン画面、ARA 2連携、MIDI・音声録音、タイムストレッチ、オートメーション、日本語UI、ソングエディター型のパターン編集、安定性強化に加え、多機能エフェクトプラグイン「EffeTune Mixwright」(Frieve作、MITライセンス)を標準搭載しています。
+README.md:10:> 狐ToneはLMMS公式版ではなく、LMMS開発チームによる承認・サポートを受けた製品でもありません。狐Tone固有の問題はLMMS本家ではなく、このリポジトリのIssuesへ報告してください。
+README.md:14:[GitHub Releases](https://github.com/SakiikaVR/KituneTone-DAW/releases/latest)からWindows 64-bit正式版をダウンロードできます。
+README.md:16:- インストーラ版: スタートメニュー、アンインストール、狐Toneプロジェクトの関連付けに対応
+README.md:17:- ポータブル版: 任意のフォルダーへ展開して `KitsuneTone.exe` を実行
+README.md:23:導入から各画面、トラック編集、VST3、録音、ピッチベンド、オートメーション、アルペジオ、ミキサー、ARA、入出力、ショートカットまでの操作は、[狐Tone 2.3.0 全機能説明書](docs/USER_MANUAL.md)を参照してください。
+README.md:25:## 狐Tone専用プロジェクト形式
+README.md:27:狐Tone 2.1以降はLMMS形式から分離した専用形式を使用します。
+README.md:31:| `.ktpz` | 圧縮プロジェクト（標準） |
+README.md:32:| `.ktp` | 非圧縮プロジェクト |
+README.md:33:| `.ktt` | プロジェクトテンプレート |
+README.md:35:XMLルート要素は `kitsunetone-project`、作成元は `KitsuneTone` として保存されます。LMMSの `.mmp`、`.mmpz`、`.mpt` は開けません。また、非VST3エフェクトの読み込み互換機能もありません。
+README.md:102:ビルド後の実行ファイルは `build/KitsuneTone.exe` です。Windows配布物は `packaging/windows/build-release.ps1` で生成します。
+README.md:106:狐ToneはLMMSから派生したGPLソフトウェアです。LMMS由来のコードと狐Toneで加えた変更は、各ファイルに別の記載がない限り、[GNU General Public License version 2 or later](LICENSE.txt)（GPL-2.0-or-later）の条件で利用・再配布できます。
+README.md:114:| [LMMS](https://github.com/LMMS/lmms) | GPL-2.0-or-later | 狐Toneの基盤 |
+cmake/nsis/lmms.rc.in:18:      VALUE "FileDescription",  "KitsuneTone DAW\0"
+cmake/nsis/lmms.rc.in:21:      VALUE "OriginalFilename", "KitsuneTone.exe\0"
+cmake/nsis/lmms.rc.in:22:      VALUE "ProductName",      "KitsuneTone\0"
+data/projects/CMakeLists.txt:3:INSTALL_DATA_SUBDIRS("projects" "*.ktp")
+data/projects/CMakeLists.txt:4:INSTALL_DATA_SUBDIRS("projects" "*.ktpz")
+data/projects/CMakeLists.txt:5:INSTALL_DATA_SUBDIRS("projects" "*.ktt")
+docs/USER_MANUAL.md:1:# 狐Tone 2.3.0 全機能説明書
+docs/USER_MANUAL.md:3:この説明書はWindows 10／11向け正式版「狐Tone 2.3.0」のユーザー操作をまとめたものです。狐ToneはVST3専用DAWであり、LMMS内蔵音源、LADSPA、LV2、VST2には対応しません。
+docs/USER_MANUAL.md:30:1. GitHub Releasesから `KitsuneTone-2.3.0-win64-setup.exe` を取得します。
+docs/USER_MANUAL.md:32:3. スタートメニューの「狐Tone」から起動します。
+docs/USER_MANUAL.md:34:インストーラ版は `.ktp`、`.ktpz`、`.ktt` を狐Toneに関連付け、アンインストーラを登録します。
+docs/USER_MANUAL.md:38:1. `KitsuneTone-2.3.0-win64-portable.zip` を任意のフォルダーへ展開します。
+docs/USER_MANUAL.md:39:2. 展開先の `KitsuneTone.exe` を起動します。
+docs/USER_MANUAL.md:45:狐ToneはWindowsの共通VST3フォルダー、ユーザー側のVST3フォルダー、狐Tone本体と同じ場所にある `VST3` フォルダーを検索します。付属のTriangleSynth(音源)とEffeTune Mixwright(エフェクト、Frieve作・MITライセンス)もVST3として読み込まれます。新しくインストールしたVST3が出ない場合は狐Toneを再起動してください。
+docs/USER_MANUAL.md:83:これらは「表示」メニューまたは対応ショートカットで開閉できます。狐Tone終了時は独立表示中の補助画面も一緒に終了します。
+docs/USER_MANUAL.md:90:- テンプレートから新規: `.ktt` を元に作成
+docs/USER_MANUAL.md:91:- 開く: 既存の狐Toneプロジェクトを開く
+docs/USER_MANUAL.md:101:| `.ktpz` | 圧縮された標準プロジェクト |
+docs/USER_MANUAL.md:102:| `.ktp` | XML形式の非圧縮プロジェクト |
+docs/USER_MANUAL.md:103:| `.ktt` | プロジェクトテンプレート |
+docs/USER_MANUAL.md:199:狐Toneで録音される「エンベロープ」は、各ノートに付属するピッチベンド曲線です。
+docs/USER_MANUAL.md:206:Vitalなどの音量エンベロープやLFOはVST3内部の機能なので、「プラグイン画面」で編集します。狐Toneのピッチ曲線とは別物です。
+docs/USER_MANUAL.md:257:テンポ、音量、パンなど、狐Tone側のオートメーション対応ノブでも同じ右クリック操作を使えます。
+docs/USER_MANUAL.md:299:狐Toneはトラック内の音声ファイル、配置位置、長さ、再生領域、テンポ、拍子をARAドキュメントへ渡します。クリップ変更時は再同期され、対応プラグインの解析・編集状態はプロジェクトへ保存されます。
+docs/USER_MANUAL.md:317:LFO、ピークなどのコントローラーを管理し、オートメーション対応パラメーターへ接続します。ラックを閉じた後に狐Toneを終了すると、ラックだけがバックグラウンドに残ることはありません。
+docs/USER_MANUAL.md:331:- 狐Toneプロジェクト／テンプレート
+docs/USER_MANUAL.md:396:- 狐Tone 2.3.0は64-bit Windows向けです。
+docs/USER_MANUAL.md:399:- 狐Toneの `.ktp`、`.ktpz`、`.ktt` はLMMSとの互換性がありません。
+docs/USER_MANUAL.md:414:- インストール後に狐Toneを再起動
+docs/USER_MANUAL.md:440:正式版ではVST3 GUI、コントローラーラック、補助画面を終了処理で閉じます。再現する場合は使用したVST3名、操作手順、ログを狐ToneのIssuesへ報告してください。
+docs/USER_MANUAL.md:444:狐ToneはLMMSを基盤とするGPL-2.0-or-laterの派生ソフトウェアです。ライセンスと第三者コンポーネントの詳細は[README](../README.md)と[LICENSE.txt](../LICENSE.txt)を参照してください。
+include/Branding.h:4: * QuickSalad is derived from LMMS and KitsuneTone and remains licensed under GPL-2.0-or-later.
+include/VersionedSaveDialog.h:4: * appended to the file name. (e.g. "MyProject-01.ktpz")
+plugins/TriangleVst3/CMakeLists.txt:1:# KitsuneTone's bundled default sound source, built as a real, standalone VST3
+plugins/TriangleVst3/TriangleSynth.cpp:4: * Bundled with KitsuneTone as its default sound source. Built with the vendored
+plugins/TriangleVst3/TriangleSynth.cpp:27:namespace kitsune {
+plugins/TriangleVst3/TriangleSynth.cpp:182:} // namespace kitsune
+plugins/TriangleVst3/TriangleSynth.cpp:194:BEGIN_FACTORY_DEF("KitsuneTone",
+plugins/TriangleVst3/TriangleSynth.cpp:195:		"https://github.com/SakiikaVR/KituneTone-DAW",
+plugins/TriangleVst3/TriangleSynth.cpp:196:		"mailto:noreply@kitsunetone.local")
+plugins/TriangleVst3/TriangleSynth.cpp:198:	DEF_CLASS2(INLINE_UID_FROM_FUID(kitsune::kTriangleSynthUID),
+plugins/TriangleVst3/TriangleSynth.cpp:206:			kitsune::TriangleSynth::createInstance)
+plugins/Vst3Base/Vst3AraHost.cpp:428:	docProps.name = "KitsuneTone ARA Document";
+plugins/Vst3Base/Vst3AraHost.cpp:439:	musicalCtxProps.name = "KitsuneTone Context";
+plugins/Vst3Base/Vst3AraHost.cpp:444:	regionSeqProps.name = "KitsuneTone Track";
+plugins/Vst3Base/Vst3AraHost.cpp:536:		sourceProps.name = "KitsuneTone Audio";
+plugins/Vst3Base/Vst3AraHost.cpp:548:		modProps.name = "KitsuneTone Modification";
+plugins/Vst3Base/Vst3AraHost.cpp:565:		regionProps.name = "KitsuneTone Region";
+plugins/Vst3Base/Vst3AraHost.cpp:662:			regionProps.name = "KitsuneTone Region";
+plugins/Vst3Base/vst3_base.cpp:38:	"library for all KitsuneTone plugins hosting native VST3 plug-ins",
+plugins/Vst3Base/vst3_base.cpp:39:	"KitsuneTone contributors",
+plugins/Vst3Effect/Vst3Effect.cpp:76:			"plugin for using native VST3 effects inside KitsuneTone." ),
+plugins/Vst3Effect/Vst3Effect.cpp:77:	"KitsuneTone contributors",
+plugins/Vst3Instrument/Vst3Instrument.cpp:79:			"plugin for using native VST3 instruments inside KitsuneTone." ),
+plugins/Vst3Instrument/Vst3Instrument.cpp:80:	"KitsuneTone contributors",
+plugins/Vst3Instrument/Vst3Instrument.cpp:413:			"オンにすると、狐Tone全体のマスターピッチ変更に合わせてこのトラックも移調します。"));
+src/core/DataFile.cpp:2230:				SongEditor::tr("This %1 was created with KitsuneTone %2")
+src/core/ImportFilter.cpp:85:						"KitsuneTone using another software."
+src/core/PluginFactory.cpp:188:				qWarning() << qApp->translate("PluginFactory", "KitsuneTone plugin %1 does not have a plugin descriptor named %2!").
+src/core/PluginFactory.cpp:272:	// KitsuneTone only ships the native VST3 hosts and MIDI file filters.
+src/core/Song.cpp:1384:			QMessageBox::warning(nullptr, tr("KitsuneTone error report"), errorSummary(),
+src/core/audio/AudioJack.cpp:142:			tr(	"KitsuneTone was kicked by JACK for some reason. "
+src/core/audio/AudioJack.cpp:143:				"Therefore the JACK backend of KitsuneTone has been "
+src/core/main.cpp:965:		// autosave one time as recover.ktp is a signal to possible other
+src/gui/FileBrowser.cpp:1337:	const auto projectFilters = QStringList{"*.ktp", "*.ktt", "*.ktpz"};
+src/gui/LmmsStyle.cpp:52://! The default accent colour (KitsuneTone light blue / 水色).
+src/gui/LmmsStyle.cpp:144:			+ QStringLiteral("/kitsunetone_theme/h") + QString::number(targetHue);
+src/gui/LmmsStyle.cpp:359:					tr("KitsuneTone theme file %1 has been reloaded.").arg(file.fileName()),
+src/gui/MainWindow.cpp:229:		// to save or it will run over recover.ktp if you hesitate at the
+src/gui/MainWindow.cpp:479:			tr("Failed to setup audio device for playback. Try adjusting your audio device settings (e.g. the sample rate), then restart KitsuneTone."));
+src/gui/MainWindow.cpp:606:	setWindowTitle(title + " - " + QStringLiteral("狐Tone %1").arg(LMMS_VERSION));
+src/gui/menus/RecentProjectsMenu.cpp:39:	//	most recent ones that we can open and omit .ktt files.
+src/gui/menus/TemplatesMenu.cpp:54:	QFileInfoList templates = dir.entryInfoList(QStringList("*.ktt"),
+src/gui/modals/ControllerConnectionDialog.cpp:332:			QMessageBox::warning(this, tr("狐Tone"), tr("Cycle Detected."));
+src/gui/modals/about_dialog.ui:100:          <string>QuickSalad is a fork of KitsuneTone, which in turn is a fork of LMMS. I don't claim ownership over contributions by either LMMS or KitsuneTone teams.</string>
+tests/src/core/ConfigManagerTest.cpp:4: * This file is part of KitsuneTone.
+tests/src/core/ConfigManagerTest.cpp:30:			temporaryDirectory.filePath("missing/parent/kitsunetone-config.xml");

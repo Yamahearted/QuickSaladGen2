@@ -7,13 +7,13 @@ endif()
 #   https://cmake.org/pipermail/cmake/2008-June/022085.html
 SET(CPACK_PACKAGE_ICON                  "${CMAKE_SOURCE_DIR}/cmake/nsis\\\\nsis_branding.bmp")
 SET(CPACK_NSIS_MUI_ICON                 "${CMAKE_SOURCE_DIR}/cmake/nsis/icon.ico")
-SET(CPACK_NSIS_INSTALLED_ICON_NAME      "KitsuneTone.exe" PARENT_SCOPE)
+SET(CPACK_NSIS_INSTALLED_ICON_NAME      "QuickSalad.exe" PARENT_SCOPE)
 SET(CPACK_NSIS_DISPLAY_NAME             "${PROJECT_NAME_UCASE} ${VERSION}" PARENT_SCOPE)
 SET(CPACK_NSIS_HELP_LINK                "${PROJECT_URL}" PARENT_SCOPE)
 SET(CPACK_NSIS_URL_INFO_ABOUT           "${PROJECT_URL}" PARENT_SCOPE)
 SET(CPACK_NSIS_CONTACT                  "${PROJECT_EMAIL}" PARENT_SCOPE)
-SET(CPACK_PACKAGE_EXECUTABLES           "KitsuneTone.exe;狐Tone" PARENT_SCOPE)
-SET(CPACK_NSIS_MENU_LINKS               "KitsuneTone.exe;狐Tone" PARENT_SCOPE)
+SET(CPACK_PACKAGE_EXECUTABLES           "QuickSalad.exe;QuickSalad" PARENT_SCOPE)
+SET(CPACK_NSIS_MENU_LINKS               "QuickSalad.exe;QuickSalad" PARENT_SCOPE)
 SET(CPACK_NSIS_DEFINES                  "
   !addincludedir ${CMAKE_SOURCE_DIR}/cmake/nsis
   !include FileAssociation.nsh
@@ -21,20 +21,20 @@ SET(CPACK_NSIS_DEFINES                  "
   !include WinVer.nsh")
 SET(CPACK_PACKAGE_FILE_NAME             "${CMAKE_PROJECT_NAME}-${VERSION}-${WIN_PLATFORM}-win32")
 SET(CPACK_NSIS_EXTRA_INSTALL_COMMANDS   "
-  \\\${registerExtension} \\\"$INSTDIR\\\\KitsuneTone.exe\\\" \\\".ktp\\\" \\\"KitsuneTone Project\\\"
-  \\\${registerExtension} \\\"$INSTDIR\\\\KitsuneTone.exe\\\" \\\".ktpz\\\" \\\"KitsuneTone Project (compressed)\\\"
-  \\\${registerExtension} \\\"$INSTDIR\\\\KitsuneTone.exe\\\" \\\".ktt\\\" \\\"KitsuneTone Project Template\\\"
+  \\\${registerExtension} \\\"$INSTDIR\\\\QuickSalad.exe\\\" \\\".qsl\\\" \\\"QuickSalad Project\\\"
+  \\\${registerExtension} \\\"$INSTDIR\\\\QuickSalad.exe\\\" \\\".qslz\\\" \\\"QuickSalad Project (compressed)\\\"
+  \\\${registerExtension} \\\"$INSTDIR\\\\QuickSalad.exe\\\" \\\".qtt\\\" \\\"QuickSalad Project Template\\\"
   \\\${IfNot} \\\${AtMostWin7}
     WriteRegDWORD HKLM \\\"Software\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\SideBySide\\\" \\\"PreferExternalManifest\\\" \\\"1\\\"
   \\\${EndIf}
   " PARENT_SCOPE)
 SET(CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "
-  \\\${unregisterExtension} \\\".ktp\\\" \\\"KitsuneTone Project\\\"
-  \\\${unregisterExtension} \\\".ktpz\\\" \\\"KitsuneTone Project (compressed)\\\"
-  \\\${unregisterExtension} \\\".ktt\\\" \\\"KitsuneTone Project Template\\\"
-  DeleteRegKey HKCR \\\"KitsuneTone Project\\\"
-  DeleteRegKey HKCR \\\"KitsuneTone Project (compressed)\\\"
-  DeleteRegKey HKCR \\\"KitsuneTone Project Template\\\"
+  \\\${unregisterExtension} \\\".qsl\\\" \\\"QuickSalad Project\\\"
+  \\\${unregisterExtension} \\\".qslz\\\" \\\"QuickSalad Project (compressed)\\\"
+  \\\${unregisterExtension} \\\".qtt\\\" \\\"QuickSalad Project Template\\\"
+  DeleteRegKey HKCR \\\"QuickSalad Project\\\"
+  DeleteRegKey HKCR \\\"QuickSalad Project (compressed)\\\"
+  DeleteRegKey HKCR \\\"QuickSalad Project Template\\\"
   " PARENT_SCOPE)
 
 IF(WIN64)

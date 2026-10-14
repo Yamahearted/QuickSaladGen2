@@ -75,6 +75,8 @@
 #include "ToolPlugin.h"
 #include "VersionedSaveDialog.h"
 
+#include "Branding.h"
+
 #include "lmmsversion.h"
 
 
@@ -117,8 +119,13 @@ MainWindow::MainWindow() :
 	sideBar->appendTab(new FileBrowser(FileBrowser::Type::Favorites, ConfigManager::inst()->favoriteItems().join("*"), FileItem::defaultFilters(), tr("My Favorites"),
 		embed::getIconPixmap("star").transformed(QTransform().rotate(90)), splitter, false, "", ""));
 
+	QString projectFilters = QStringLiteral("*.%1 *.%2 *.%3 *.xml *.mid")
+		.arg(branding::ProjectExtension)
+		.arg(branding::CompressedProjectExtension)
+		.arg(branding::TemplateExtension);
+
 	sideBar->appendTab(new FileBrowser(FileBrowser::Type::Normal,
-		confMgr->userProjectsDir() + "*" + confMgr->factoryProjectsDir(), "*.ktp *.ktpz *.ktt *.xml *.mid",
+		confMgr->userProjectsDir() + "*" + confMgr->factoryProjectsDir(), projectFilters,
 		tr("My Projects"), embed::getIconPixmap("project_file").transformed(QTransform().rotate(90)), splitter, false,
 		confMgr->userProjectsDir(), confMgr->factoryProjectsDir()));
 
@@ -219,7 +226,7 @@ MainWindow::MainWindow() :
 					"ui", "saveinterval" ).toInt();
 
 		// The auto save function mustn't run until there is a project
-		// to save or it will run over recover.ktp if you hesitate at the
+		// to save or it will run over recover.qsl if you hesitate at the
 		// recover messagebox for a minute. It is now started in main.
 		// See autoSaveTimerReset() in MainWindow.h
 	}
@@ -469,7 +476,7 @@ void MainWindow::finalize()
 		ConfigManager::inst()->value( "audioengine", "audiodev" ) ) )
 	{
 		QMessageBox::critical(nullptr, "Audio device setup failed",
-			tr("Failed to setup audio device for playback. Try adjusting your audio device settings (e.g. the sample rate), then restart KitsuneTone."));
+			tr("Failed to setup audio device for playback. Try adjusting your audio device settings (e.g. the sample rate), then restart QuickSalad."));
 
 		// if so, offer the audio settings section of the setup dialog
 		SetupDialog sd( SetupDialog::ConfigTab::AudioSettings );
@@ -596,7 +603,7 @@ void MainWindow::resetWindowTitle()
 		title += " - " + tr( "Recover session. Please save your work!" );
 	}
 
-	setWindowTitle(title + " - " + QStringLiteral("狐Tone %1").arg(LMMS_VERSION));
+	setWindowTitle(title + " - " + QStringLiteral("QuickSalad").arg(LMMS_VERSION));
 }
 
 
@@ -639,9 +646,9 @@ bool MainWindow::mayChangeProject(bool stopPlayback)
 		| QMessageBox::Cancel;
 
 	auto mb = QMessageBox{QMessageBox::Question, title, text, buttons, this};
-	mb.button(QMessageBox::Save)->setText(QStringLiteral("保存"));
-	mb.button(QMessageBox::Discard)->setText(QStringLiteral("保存しない"));
-	mb.button(QMessageBox::Cancel)->setText(QStringLiteral("キャンセル"));
+	mb.button(QMessageBox::Save)->setText(QStringLiteral("Save"));
+	mb.button(QMessageBox::Discard)->setText(QStringLiteral("Don't Save"));
+	mb.button(QMessageBox::Cancel)->setText(QStringLiteral("Cancel"));
 	mb.setDefaultButton(QMessageBox::Save);
 	mb.setEscapeButton(QMessageBox::Cancel);
 	int answer = mb.exec();
@@ -758,8 +765,12 @@ void MainWindow::openProject()
 {
 	if( mayChangeProject(false) )
 	{
-		FileDialog ofd(this, tr("Open Project"), "",
-			tr("KitsuneTone Project (*.ktp *.ktpz)"));
+		QString filterString = tr("%1 Project (*.%2 *.%3)")
+			.arg(branding::DisplayName)
+			.arg(branding::ProjectExtension)
+			.arg(branding::CompressedProjectExtension);
+
+		FileDialog ofd(this, tr("Open Project"), "", filterString);
 
 		ofd.setDirectory( ConfigManager::inst()->userProjectsDir() );
 		ofd.setFileMode( FileDialog::ExistingFiles );
@@ -802,9 +813,12 @@ bool MainWindow::saveProject()
 bool MainWindow::saveProjectAs()
 {
 	auto optionsWidget = new SaveOptionsWidget(Engine::getSong()->getSaveOptions());
-	VersionedSaveDialog sfd( this, optionsWidget, tr( "Save Project" ), "",
-			tr("KitsuneTone Project") + " (*.ktpz *.ktp);;" +
-				tr("KitsuneTone Project Template") + " (*.ktt)");
+	
+	QString nameFilters = tr("%1 Project (*.%2 *.%3);;%4 Project Template (*.%5)")
+		.arg(branding::DisplayName).arg(branding::CompressedProjectExtension).arg(branding::ProjectExtension)
+		.arg(branding::DisplayName).arg(branding::TemplateExtension);
+
+	VersionedSaveDialog sfd( this, optionsWidget, tr( "Save Project" ), "", nameFilters);
 	QString f = Engine::getSong()->projectFileName();
 	if( f != "" )
 	{
@@ -817,26 +831,26 @@ bool MainWindow::saveProjectAs()
 	}
 
 	// Don't write over file with suffix if no suffix is provided.
-	QString suffix = ConfigManager::inst()->value( "app",
-							"nommpz" ).toInt() == 0
-						? "ktpz"
-						: "ktp" ;
+	QString suffix = ConfigManager::inst()->value( "app", "nommpz" ).toInt() == 0
+						? branding::CompressedProjectExtension
+						: branding::ProjectExtension;
 	sfd.setDefaultSuffix( suffix );
 
 	if( sfd.exec () == FileDialog::Accepted &&
 		!sfd.selectedFiles().isEmpty() && sfd.selectedFiles()[0] != "" )
 	{
 		QString fname = sfd.selectedFiles()[0] ;
-		if (sfd.selectedNameFilter().contains("(*.ktt)"))
+		QString templateDotExt = QString(".%1").arg(branding::TemplateExtension);
+		if (sfd.selectedNameFilter().contains(templateDotExt))
 		{
 			// Remove the default suffix
 			fname.remove( "." + suffix );
-			if (!sfd.selectedFiles()[0].endsWith(".ktt"))
+			if (!sfd.selectedFiles()[0].endsWith(templateDotExt))
 			{
-				if (VersionedSaveDialog::fileExistsQuery(fname + ".ktt",
+				if (VersionedSaveDialog::fileExistsQuery(fname + templateDotExt,
 						tr( "Save project template" ) ) )
 				{
-					fname += ".ktt";
+					fname += templateDotExt;
 				}
 			}
 		}
@@ -876,7 +890,7 @@ bool MainWindow::saveProjectAsNewVersion()
 
 void MainWindow::saveProjectAsDefaultTemplate()
 {
-	QString defaultTemplate = ConfigManager::inst()->userTemplateDir() + "default.ktt";
+	QString defaultTemplate = ConfigManager::inst()->userTemplateDir() + "default." + branding::TemplateExtension;
 
 	QFileInfo fileInfo(defaultTemplate);
 	if (fileInfo.exists())

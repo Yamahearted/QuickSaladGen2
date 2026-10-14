@@ -717,18 +717,18 @@ void ConfigManager::saveConfigFile()
 void ConfigManager::initPortableWorkingDir()
 {
 	QString applicationPath = qApp->applicationDirPath();
-	m_workingDir = applicationPath + "/kitsunetone-workspace/";
-	m_lmmsRcFile = applicationPath + "/kitsunetone-config.xml";
+	m_workingDir = applicationPath + "/quicksalad-workspace/";
+	m_lmmsRcFile = applicationPath + "/quicksalad-config.xml";
 }
 
 void ConfigManager::initInstalledWorkingDir()
 {
 	m_workingDir = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation)
-		+ "/KitsuneTone/";
+		+ "/QuickSalad/";
 	const QString configDirectory =
 		QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
 	QDir().mkpath(configDirectory);
-	m_lmmsRcFile = QDir(configDirectory).filePath("kitsunetone-config.xml");
+	m_lmmsRcFile = QDir(configDirectory).filePath("quicksalad-config.xml");
 }
 
 void ConfigManager::initDevelopmentWorkingDir()
@@ -759,7 +759,7 @@ void ConfigManager::initDevelopmentWorkingDir()
 			}
 			if (line.startsWith("lmms_BINARY_DIR:")) {
 				m_lmmsRcFile = line.section('=', -1).trimmed() +  QDir::separator() +
-							   "kitsunetone-config.xml";
+							   "quicksalad-config.xml";
 				done++;
 			}
 			if (done == 2)
