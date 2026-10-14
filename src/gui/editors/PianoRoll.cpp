@@ -1669,6 +1669,16 @@ void PianoRoll::mousePressEvent(QMouseEvent * me )
 
 	const auto pos = position(me);
 
+	// -- Middle Mouse Button Canvas Panning Anchor
+	if (me->button() == Qt::MiddleButton)
+	{
+		m_lastMouseX = pos.x();
+		m_lastMouseY = pos.y();
+		setCursor(Qt::ClosedHandCursor);
+		me->accept();
+		return;
+	}
+
 	// -- Knife
 	if (m_editMode == EditMode::Knife && me->button() == Qt::LeftButton)
 	{
@@ -2431,6 +2441,13 @@ void PianoRoll::mouseReleaseEvent( QMouseEvent * me )
 		mustRepaint = true;
 	}
 
+	if (me->button() == Qt::MiddleButton)
+	{
+		setCursor(Qt::ArrowCursor);
+		me->accept();
+		return;
+	}
+
 	if( hasValidMidiClip() )
 	{
 		// turn off all notes that are playing
@@ -2481,6 +2498,37 @@ void PianoRoll::mouseMoveEvent( QMouseEvent * me )
 	}
 
 	const auto pos = position(me);
+
+	// -- Middle Mouse Button Canvas Panning Execution
+	if (me->buttons() & Qt::MiddleButton)
+	{
+		int deltaX = pos.x() - m_lastMouseX;
+		int deltaY = pos.y() - m_lastMouseY;
+
+		if (deltaX != 0)
+		{
+			// Translate pixel drag to timeline ticks based on zoom level (m_ppb)
+			int tickDelta = (deltaX * TimePos::ticksPerBar()) / m_ppb;
+			m_leftRightScroll->setValue(m_leftRightScroll->value() - tickDelta);
+		}
+
+		if (deltaY != 0)
+		{
+			// Convert vertical pixel movement to key line increments
+			int keyDelta = deltaY / m_keyLineHeight;
+			if (keyDelta != 0)
+			{
+				m_topBottomScroll->setValue(m_topBottomScroll->value() - keyDelta);
+				// Re-align the mouse anchor after moving vertical steps
+				m_lastMouseY = pos.y();
+			}
+		}
+
+		m_lastMouseX = pos.x();
+		update();
+		me->accept();
+		return;
+	}
 
 	if( m_action == Action::None && me->buttons() == 0 )
 	{
