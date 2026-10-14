@@ -2004,15 +2004,23 @@ void PianoRoll::mousePressEvent(QMouseEvent * me )
 							m_editMode == EditMode::Draw ) ||
 					m_editMode == EditMode::Erase )
 			{
-				// erase single note
-				m_mouseDownRight = true;
 				if (it != notes.rend())
 				{
+					// erase single note (there is a note under the cursor)
+					m_mouseDownRight = true;
 					m_midiClip->addJournalCheckPoint();
 					m_midiClip->removeNote( *it );
 					Engine::getSong()->setModified();
 				}
+				else if (me->button() == Qt::RightButton && m_editMode == EditMode::Draw)
+				{
+					// FL Studio Workflow: Right-clicked empty space -> clear selection
+					m_midiClip->addJournalCheckPoint();
+					clearSelectedNotes();
+					Engine::getSong()->setModified();
+				}
 			}
+
 			else if( me->button() == Qt::LeftButton &&
 							m_editMode == EditMode::Select )
 			{
@@ -4109,182 +4117,121 @@ void PianoRoll::adjustLeftRightScoll(int value)
 
 
 
-void PianoRoll::wheelEvent(QWheelEvent * we )
+void PianoRoll::wheelEvent(QWheelEvent * we)
 {
 	we->accept();
-	const auto pos = we->position().toPoint();
+	const QPoint pos = we->position().toPoint();
 
-	bool inPropertyArea = (pos.x() > noteEditLeft() && pos.x() < noteEditRight()
-		&& pos.y() > noteEditTop() && pos.y() < noteEditBottom());
-
-	// Check if we are over the main piano roll canvas grid instead
-	bool inCanvasArea = (pos.x() > m_whiteKeyWidth && pos.x() < width() - SCROLLBAR_SIZE
-		&& pos.y() > PR_TOP_MARGIN && pos.y() < keyAreaBottom());
-
-	// Act if we are in the properties block OR hovering over a note on the main grid
-	if (inPropertyArea || (inCanvasArea && noteUnderMouse() != nullptr))
+	// FL STUDIO WORKFLOW: Only allow wheel value adjustments if you are actively 
+	// HOLDING DOWN a note with the mouse (m_action == Action::MoveNote).
+	// If you are just hovering without holding, skip this block and scroll the canvas instead.
+	if (hasValidMidiClip() && m_action == Action::MoveNote && m_currentNote != nullptr)
 	{
-		if (!hasValidMidiClip()) {return;}
-		// get values for going through notes
-		int pixel_range = 8;
-		int x = pos.x() - m_whiteKeyWidth;
-		int ticks_start = ( x - pixel_range / 2 ) *
-					TimePos::ticksPerBar() / m_ppb + m_currentPosition;
-		int ticks_end = ( x + pixel_range / 2 ) *
-					TimePos::ticksPerBar() / m_ppb + m_currentPosition;
-
-		// When alt is pressed we only edit the note under the cursor
 		bool altPressed = we->modifiers() & Qt::AltModifier;
-
-		// go through notes to figure out which one we want to change
 		NoteVector nv;
 		bool isSelection = false;
-		for ( Note * i : m_midiClip->notes() )
+
+		// If you have a multi-note selection, adjust all selected notes together
+		for (Note * i : m_midiClip->notes())
 		{
-			if (i->selected() && !altPressed) // found a selected note
+			if (i->selected() && !altPressed)
 			{
 				if (!isSelection)
 				{
-					// drop other notes if we are realizing this is a selection now
 					isSelection = true;
 					nv.clear();
 				}
-
 				nv.push_back(i);
 			}
-		// If no notes were caught via standard column proximity, but we are hovering over a single note, target it explicitly
-		if (nv.empty() && inCanvasArea)
+		}
+
+		// If no selection is active, target only the single note you are currently holding down
+		if (nv.empty())
 		{
-			Note* hoveredNote = noteUnderMouse();
-			if (hoveredNote != nullptr)
-			{
-				nv.push_back(hoveredNote);
-			}
-		}
-			// not on selection - just push back the note if it is within range
-			if (!isSelection && i->withinRange(ticks_start, ticks_end))
-			{
-				nv.push_back(i);
-			}
+			nv.push_back(m_currentNote);
 		}
 
-		if( nv.size() > 0 )
+		if (nv.size() > 0)
 		{
 			const int step = (we->angleDelta().y() > 0 ? 1 : -1) * (we->inverted() ? -1 : 1);
 
-			if( m_noteEditMode == NoteEditMode::Volume )
+			if (m_noteEditMode == NoteEditMode::Volume)
 			{
-				for ( Note * n : nv )
+				for (Note * n : nv)
 				{
-					volume_t vol = qBound<int>( MinVolume, n->getVolume() + step, MaxVolume );
-					n->setVolume( vol );
+					volume_t vol = qBound<int>(MinVolume, n->getVolume() + step, MaxVolume);
+					n->setVolume(vol);
 				}
-				bool allVolumesEqual = std::all_of( nv.begin(), nv.end(),
-					[nv](const Note *note)
-					{
-						return note->getVolume() == nv[0]->getVolume();
-					});
-				if ( allVolumesEqual )
-				{
-					// show the volume hover-text only if all notes have the
-					// same volume
-					showVolTextFloat(nv[0]->getVolume(), pos, 1000);
-				}
-				// Emit MIDI clip has changed
+				bool allVolumesEqual = std::all_of(nv.begin(), nv.end(), 
+					[nv](const Note *note) { return note->getVolume() == nv[0]->getVolume(); });
+				if (allVolumesEqual) { showVolTextFloat(nv[0]->getVolume(), pos, 1000); }
 				m_midiClip->dataChanged();
 			}
-			else if( m_noteEditMode == NoteEditMode::Panning )
+			else if (m_noteEditMode == NoteEditMode::Panning)
 			{
-				for ( Note * n : nv )
+				for (Note * n : nv)
 				{
 					panning_t pan = qBound(PanningLeft, static_cast<panning_t>(n->getPanning() + step), PanningRight);
 					n->setPanning(pan);
 				}
-				bool allPansEqual = std::all_of( nv.begin(), nv.end(),
-					[nv](const Note *note)
-					{
-						return note->getPanning() == nv[0]->getPanning();
-					});
-				if ( allPansEqual )
-				{
-					// show the pan hover-text only if all notes have the same
-					// panning
-					showPanTextFloat(nv[0]->getPanning(), pos, 1000);
-				}
+				bool allPansEqual = std::all_of(nv.begin(), nv.end(), 
+					[nv](const Note *note) { return note->getPanning() == nv[0]->getPanning(); });
+				if (allPansEqual) { showPanTextFloat(nv[0]->getPanning(), pos, 1000); }
 			}
 			update();
+			return; // Exit early since we successfully adjusted the held note's properties
 		}
 	}
 
-	// not in note edit area, so handle scrolling/zooming and quantization change
-	else
-	if( we->modifiers() & Qt::ControlModifier && we->modifiers() & Qt::AltModifier )
+	// 2. MODIFIER UTIL HOTKEYS (Quantization, Zoom, and Length values)
+	if (we->modifiers() & Qt::ControlModifier && we->modifiers() & Qt::AltModifier)
 	{
 		int q = m_quantizeModel.value();
-		if((we->angleDelta().x() + we->angleDelta().y()) > 0) // alt + scroll becomes horizontal scroll on KDE
-		{
-			q--;
-		}
-		else if((we->angleDelta().x() + we->angleDelta().y()) < 0) // alt + scroll becomes horizontal scroll on KDE
-		{
-			q++;
-		}
-		q = qBound( 0, q, m_quantizeModel.size() - 1 );
-		m_quantizeModel.setValue( q );
+		if ((we->angleDelta().x() + we->angleDelta().y()) > 0) { q--; }
+		else if ((we->angleDelta().x() + we->angleDelta().y()) < 0) { q++; }
+		q = qBound(0, q, m_quantizeModel.size() - 1);
+		m_quantizeModel.setValue(q);
+		return;
 	}
-	else if( we->modifiers() & Qt::ControlModifier && we->modifiers() & Qt::ShiftModifier )
+	else if (we->modifiers() & Qt::ControlModifier && we->modifiers() & Qt::ShiftModifier)
 	{
 		int l = m_noteLenModel.value();
-		if(we->angleDelta().y() > 0)
-		{
-			l--;
-		}
-		else if(we->angleDelta().y() < 0)
-		{
-			l++;
-		}
-		l = qBound( 0, l, m_noteLenModel.size() - 1 );
-		m_noteLenModel.setValue( l );
+		if (we->angleDelta().y() > 0) { l--; }
+		else if (we->angleDelta().y() < 0) { l++; }
+		l = qBound(0, l, m_noteLenModel.size() - 1);
+		m_noteLenModel.setValue(l);
+		return;
 	}
-	else if( we->modifiers() & Qt::ControlModifier )
+	else if (we->modifiers() & Qt::ControlModifier)
 	{
 		int z = m_zoomingModel.value();
-		if(we->angleDelta().y() > 0)
-		{
-			z++;
-		}
-		else if(we->angleDelta().y() < 0)
-		{
-			z--;
-		}
-		z = qBound( 0, z, m_zoomingModel.size() - 1 );
+		if (we->angleDelta().y() > 0) { z++; }
+		else if (we->angleDelta().y() < 0) { z--; }
+		z = qBound(0, z, m_zoomingModel.size() - 1);
 
 		int x = (pos.x() - m_whiteKeyWidth) * TimePos::ticksPerBar();
-		// ticks based on the mouse x-position where the scroll wheel was used
 		int ticks = x / m_ppb;
-		// what would be the ticks in the new zoom level on the very same mouse x
 		int newTicks = x / (DEFAULT_PR_PPB * m_zoomLevels[z]);
-		// scroll so the tick "selected" by the mouse x doesn't move on the screen
 		m_leftRightScroll->setValue(m_leftRightScroll->value() + ticks - newTicks);
-		// update combobox with zooming-factor
-		m_zoomingModel.setValue( z );
+		m_zoomingModel.setValue(z);
+		return;
 	}
 
-	// FIXME: Reconsider if determining orientation is necessary in Qt6.
-	else if (std::abs(we->angleDelta().x()) > std::abs(we->angleDelta().y())) // scrolling is horizontal
+	// 3. BASELINE FALLBACK: Standard Window Timeline Canvas Panning
+	if (std::abs(we->angleDelta().x()) > std::abs(we->angleDelta().y()))
 	{
 		adjustLeftRightScoll(we->angleDelta().x());
 	}
-	else if(we->modifiers() & Qt::ShiftModifier)
+	else if (we->modifiers() & Qt::ShiftModifier)
 	{
 		adjustLeftRightScoll(we->angleDelta().y());
 	}
 	else
 	{
-		m_topBottomScroll->setValue(m_topBottomScroll->value() -
-							we->angleDelta().y() / 30);
+		m_topBottomScroll->setValue(m_topBottomScroll->value() - we->angleDelta().y() / 30);
 	}
 }
+
 
 
 
@@ -4601,8 +4548,8 @@ void PianoRoll::setEditMode(int mode)
 {
 	if (static_cast<EditMode>(mode) == EditMode::Detuning)
 	{
-		TextFloat::displayMessage(QStringLiteral("ピッチベンド編集"),
-			QStringLiteral("ノートまたは選択範囲を左ドラッグしてカーブを編集します\n右ドラッグ: 点を削除 / Shift+クリック: 詳細エディター"),
+		TextFloat::displayMessage(QStringLiteral("Note Bend"),
+			QStringLiteral("Click to add new pitch bend points, Shift+Click for advanced editor"),
 			embed::getIconPixmap("automation"), 4000);
 	}
 	m_ctrlMode = m_editMode = (EditMode) mode;
@@ -5297,7 +5244,7 @@ PianoRollWindow::PianoRollWindow() :
 	QAction* eraseAction = editModeGroup->addAction( embed::getIconPixmap( "edit_erase" ), tr("Erase mode (Shift+E)" ) );
 	QAction* selectAction = editModeGroup->addAction( embed::getIconPixmap( "edit_select" ), tr( "Select mode (Shift+S)" ) );
 	QAction* pitchBendAction = editModeGroup->addAction(
-			embed::getIconPixmap("automation"), QStringLiteral("ピッチベンド編集 (Shift+T)"));
+			embed::getIconPixmap("automation"), QStringLiteral("Note Bend (Shift+T)"));
 
 	drawAction->setChecked( true );
 

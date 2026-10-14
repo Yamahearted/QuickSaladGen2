@@ -37,6 +37,11 @@
 #include "TrackRenameLineEdit.h"
 #include "TrackView.h"
 #include "Track.h"
+#include "StringPairDrag.h"
+#include "Engine.h"
+#include "Song.h"
+#include "ProjectJournal.h"
+
 
 namespace lmms::gui
 {
@@ -52,6 +57,7 @@ TrackLabelButton::TrackLabelButton( TrackView * _tv, QWidget * _parent ) :
 	setToolButtonStyle( Qt::ToolButtonTextBesideIcon );
 
 	m_renameLineEdit = new TrackRenameLineEdit( this );
+	m_renameLineEdit->setAcceptDrops( false );
 	m_renameLineEdit->hide();
 	
 	if (isInCompactMode())
@@ -148,9 +154,34 @@ void TrackLabelButton::dragEnterEvent( QDragEnterEvent * _dee )
 
 void TrackLabelButton::dropEvent( QDropEvent * _de )
 {
+	QString type = StringPairDrag::decodeKey( _de );
+	QString value = StringPairDrag::decodeValue( _de );
+
+	if( type == "instrument" )
+	{
+		auto* instrumentTrack = dynamic_cast<InstrumentTrack*>(m_trackView->getTrack());
+		
+		if( instrumentTrack != nullptr )
+		{
+
+			Engine::projectJournal()->addJournalCheckPoint( instrumentTrack );
+
+			instrumentTrack->loadInstrument( value, nullptr, true /* DnD */ );
+
+			instrumentTrack->dataChanged();
+			m_trackView->update();
+			
+			_de->accept();
+			setChecked( true );
+			return; 
+		}
+	}
+
 	m_trackView->dropEvent( _de );
 	setChecked( true );
 }
+
+
 
 
 

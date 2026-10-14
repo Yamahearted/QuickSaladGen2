@@ -297,7 +297,7 @@ void Vst3InstrumentView::buildTabs()
 	m_pluginView->addTab(midiView, QStringLiteral("MIDI"));
 
 	// Instrument-only functionality follows as additional tabs.
-	m_pluginView->addTab(createTrackTab(track), QStringLiteral("トラック"));
+	m_pluginView->addTab(createTrackTab(track), QStringLiteral("Track"));
 
 	auto* functions = new QWidget(m_pluginView);
 	auto* functionsLayout = new QVBoxLayout(functions);
@@ -311,11 +311,11 @@ void Vst3InstrumentView::buildTabs()
 	arpeggioView->setModel(track->arpeggio());
 	functionsLayout->addWidget(arpeggioView);
 	functionsLayout->addStretch();
-	m_pluginView->addTab(functions, QStringLiteral("アルペジオ/コード"));
+	m_pluginView->addTab(functions, QStringLiteral("Arpeggio/Chord"));
 
 	auto* effects = new EffectRackView(
 			track->audioBusHandle()->effects(), m_pluginView);
-	m_pluginView->addTab(effects, QStringLiteral("エフェクト"));
+	m_pluginView->addTab(effects, QStringLiteral("Effects"));
 
 	if (instrument->isMidiBased())
 	{
@@ -337,7 +337,7 @@ QWidget* Vst3InstrumentView::createTrackTab(InstrumentTrack* track)
 	outer->setSpacing(8);
 
 	auto* nameRow = new QHBoxLayout;
-	nameRow->addWidget(new QLabel(QStringLiteral("トラック名:"), page));
+	nameRow->addWidget(new QLabel(QStringLiteral("Track Name:"), page));
 	auto* nameEdit = new QLineEdit(track->name(), page);
 	nameRow->addWidget(nameEdit, 1);
 	outer->addLayout(nameRow);
@@ -348,18 +348,18 @@ QWidget* Vst3InstrumentView::createTrackTab(InstrumentTrack* track)
 	});
 
 	auto* stateRow = new QHBoxLayout;
-	auto* mute = new AutomatableButton(page, QStringLiteral("ミュート"));
+	auto* mute = new AutomatableButton(page, QStringLiteral("Mute"));
 	mute->setModel(track->getMutedModel());
 	mute->setCheckable(true);
-	mute->setText(QStringLiteral("ミュート"));
-	mute->setToolTip(QStringLiteral("このトラックを消音します"));
+	mute->setText(QStringLiteral("Mute"));
+	mute->setToolTip(QStringLiteral("Mutes this track"));
 	mute->setMinimumWidth(90);
 	stateRow->addWidget(mute);
-	auto* solo = new AutomatableButton(page, QStringLiteral("ソロ"));
+	auto* solo = new AutomatableButton(page, QStringLiteral("Solo"));
 	solo->setModel(track->getSoloModel());
 	solo->setCheckable(true);
-	solo->setText(QStringLiteral("ソロ"));
-	solo->setToolTip(QStringLiteral("このトラックだけを再生します"));
+	solo->setText(QStringLiteral("Solo"));
+	solo->setToolTip(QStringLiteral("Plays only this track"));
 	solo->setMinimumWidth(90);
 	stateRow->addWidget(solo);
 	stateRow->addStretch();
@@ -379,52 +379,52 @@ QWidget* Vst3InstrumentView::createTrackTab(InstrumentTrack* track)
 		controls->setColumnStretch(column, 1);
 	};
 
-	auto* volume = new VolumeKnob(KnobType::Bright26, page, QStringLiteral("音量"));
+	auto* volume = new VolumeKnob(KnobType::Bright26, page, QStringLiteral("Volume"));
 	volume->setModel(track->volumeModel());
-	volume->setHintText(QStringLiteral("音量:"), "%");
-	addControl(volume, QStringLiteral("音量"), 0);
+	volume->setHintText(QStringLiteral("Volume:"), "%");
+	addControl(volume, QStringLiteral("Volume"), 0);
 
-	auto* pan = new Knob(KnobType::Bright26, page, QStringLiteral("パン"));
+	auto* pan = new Knob(KnobType::Bright26, page, QStringLiteral("Panning"));
 	pan->setModel(track->panningModel());
-	pan->setHintText(QStringLiteral("パン:"), "");
-	addControl(pan, QStringLiteral("パン"), 1);
+	pan->setHintText(QStringLiteral("Panning:"), "");
+	addControl(pan, QStringLiteral("Panning"), 1);
 
-	auto* pitch = new Knob(KnobType::Bright26, page, QStringLiteral("ピッチ"));
+	auto* pitch = new Knob(KnobType::Bright26, page, QStringLiteral("Pitch"));
 	pitch->setModel(track->pitchModel());
-	pitch->setHintText(QStringLiteral("ピッチ:"), QStringLiteral(" セント"));
-	addControl(pitch, QStringLiteral("ピッチ"), 2);
+	pitch->setHintText(QStringLiteral("Pitch:"), QStringLiteral(" cents"));
+	addControl(pitch, QStringLiteral("Pitch"), 2);
 
-	auto* pitchRange = new LcdSpinBox(2, page, QStringLiteral("ピッチベンド幅"));
+	auto* pitchRange = new LcdSpinBox(2, page, QStringLiteral("Pitch Bend Range"));
 	pitchRange->setModel(track->pitchRangeModel());
-	pitchRange->setToolTip(QStringLiteral("ピッチベンドの範囲（半音）"));
-	addControl(pitchRange, QStringLiteral("ベンド幅"), 3);
+	pitchRange->setToolTip(QStringLiteral("Pitch bend range in semitones"));
+	addControl(pitchRange, QStringLiteral("Bend Range"), 3);
 
-	auto* mixer = new LcdSpinBox(2, page, QStringLiteral("ミキサーチャンネル"));
+	auto* mixer = new LcdSpinBox(2, page, QStringLiteral("Mixer Channel"));
 	mixer->setModel(track->mixerChannelModel());
-	addControl(mixer, QStringLiteral("ミキサー"), 4);
+	addControl(mixer, QStringLiteral("Mixer"), 4);
 
 	outer->addLayout(controls);
 
 	auto* globalTranspose = new LedCheckBox(
-			QStringLiteral("全体移調をこのトラックへ適用"), page,
-			QStringLiteral("全体移調"), LedCheckBox::LedColor::Green, false);
+			QStringLiteral("Apply Global Transpose to this Track"), page,
+			QStringLiteral("Global Transpose"), LedCheckBox::LedColor::Green, false);
 	globalTranspose->setModel(track->useMasterPitchModel());
 	globalTranspose->setToolTip(QStringLiteral(
-			"オンにすると、狐Tone全体のマスターピッチ変更に合わせてこのトラックも移調します。"));
+			"When enabled, this track will automatically transpose to match global master pitch adjustments."));
 	outer->addWidget(globalTranspose);
 
 	auto* tuningHelp = new QLabel(QStringLiteral(
-			"VST3音源の微分音・スケール設定は、音源GUI側のチューニング機能を使用します。"), page);
+			"Microtonal and scale configuration for VST3 sound sources should be managed using the instrument's native GUI tuning functions."), page);
 	tuningHelp->setWordWrap(true);
 	outer->addWidget(tuningHelp);
 
-	auto* save = new QPushButton(QStringLiteral("トラックプリセットを保存..."), page);
+	auto* save = new QPushButton(QStringLiteral("Save Track Preset..."), page);
 	connect(save, &QPushButton::clicked, this,
 			[this, track] { saveTrackPreset(track); });
 	outer->addWidget(save);
 
 	outer->addStretch();
-	auto* keyboardLabel = new QLabel(QStringLiteral("キーボード"), page);
+	auto* keyboardLabel = new QLabel(QStringLiteral("Keyboard Preview"), page);
 	outer->addWidget(keyboardLabel);
 	auto* piano = new PianoView(page);
 	piano->setModel(track->pianoModel());
@@ -437,6 +437,7 @@ QWidget* Vst3InstrumentView::createTrackTab(InstrumentTrack* track)
 
 
 
+
 void Vst3InstrumentView::saveTrackPreset(InstrumentTrack* track)
 {
 	if (track == nullptr) { return; }
@@ -445,8 +446,8 @@ void Vst3InstrumentView::saveTrackPreset(InstrumentTrack* track)
 	const QString instrumentDir = presetRoot + track->instrumentName();
 	QDir().mkpath(instrumentDir);
 
-	FileDialog dialog(this, QStringLiteral("トラックプリセットを保存"), instrumentDir,
-			QStringLiteral("XMLプリセットファイル (*.xpf)"));
+	FileDialog dialog(this, QStringLiteral("Save Track Preset"), instrumentDir,
+			QStringLiteral("XML Preset File (*.xpf)"));
 	dialog.setAcceptMode(FileDialog::AcceptSave);
 	dialog.setDirectory(instrumentDir);
 	dialog.setFileMode(FileDialog::AnyFile);

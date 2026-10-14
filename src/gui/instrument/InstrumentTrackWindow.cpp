@@ -597,13 +597,17 @@ void InstrumentTrackWindow::dropEvent( QDropEvent* event )
 
 	if( type == "instrument" )
 	{
+
+		Engine::getSong()->addJournalCheckPoint();
 		m_track->loadInstrument( value, nullptr, true /* DnD */ );
+		updateInstrumentView();
 
 		Engine::getSong()->setModified();
 
 		event->accept();
 		setFocus();
 	}
+
 	else if( type == "presetfile" )
 	{
 		DataFile dataFile(value);
