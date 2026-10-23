@@ -52,8 +52,11 @@
 #include "MixerChannelLcdSpinBox.h"
 #include "MixerView.h"
 #include "TrackLabelButton.h"
-
-
+#include "StringPairDrag.h"
+#include "ProjectJournal.h"
+#include "InstrumentTrackWindow.h"
+#include "PluginFactory.h"
+#include "FileBrowser.h"
 namespace lmms::gui
 {
 
@@ -279,7 +282,11 @@ void InstrumentTrackView::modelChanged()
 
 void InstrumentTrackView::dragEnterEvent( QDragEnterEvent * _dee )
 {
-	InstrumentTrackWindow::dragEnterEventGeneric( _dee );
+	StringPairDrag::processDragEnterEvent(_dee, "instrument,vstpluginfile");
+	if( !_dee->isAccepted() )
+	{
+		InstrumentTrackWindow::dragEnterEventGeneric( _dee );
+	}
 	if( !_dee->isAccepted() )
 	{
 		TrackView::dragEnterEvent( _dee );
@@ -288,12 +295,50 @@ void InstrumentTrackView::dragEnterEvent( QDragEnterEvent * _dee )
 
 
 
-
 void InstrumentTrackView::dropEvent( QDropEvent * _de )
 {
+
+	QString type = StringPairDrag::decodeKey( _de );
+	QString value = StringPairDrag::decodeValue( _de );
+
+
+	if (type == "instrument" || type == "vstpluginfile")
+	{
+		InstrumentTrack* it = model();
+		if (it != nullptr)
+		{
+			Engine::projectJournal()->addJournalCheckPoint(it);
+
+			if (type == "vstpluginfile")
+			{
+				auto piak = getPluginFactory()->pluginSupportingExtension(
+					FileItem::extension(value));
+				if (piak.isNull()) { _de->ignore(); return; } 
+				if (Instrument* i = it->loadInstrument(piak.info.name(), &piak.key))
+				{
+					i->loadFile(value);
+				}
+			}
+			else
+			{
+				it->loadInstrument(value, nullptr, true /* DnD */);
+			}
+
+			if (m_window) { m_window->updateInstrumentView(); }
+			it->dataChanged();
+			update();
+
+			_de->acceptProposedAction();
+			return;
+		}
+	}
+
+
 	getInstrumentTrackWindow()->dropEvent( _de );
 	TrackView::dropEvent( _de );
 }
+
+
 
 
 
